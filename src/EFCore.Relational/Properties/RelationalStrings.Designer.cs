@@ -974,10 +974,10 @@ namespace Microsoft.EntityFrameworkCore.Diagnostics
             => GetString("SequenceContainsNoElements");
 
         /// <summary>
-        ///     Projecting collection correlated with keyless entity is not supported.
+        ///     Not enough information to uniquely identify outer element in correlated collection scenario. This can happen when trying to correlate on keyless entity or when using 'Distinct' or 'GroupBy' operations without projecting all of the key columns.
         /// </summary>
-        public static string ProjectingCollectionOnKeylessEntityNotSupported
-            => GetString("ProjectingCollectionOnKeylessEntityNotSupported");
+        public static string InsufficientInformationToIdentifyOuterElementOfCollectionJoin
+            => GetString("InsufficientInformationToIdentifyOuterElementOfCollectionJoin");
 
         /// <summary>
         ///     Cannot use view '{view}' for entity type '{entityType}' since it is being used for entity type '{otherEntityType}', there is a relationship between their primary keys in which '{entityType}' is the dependent and '{entityType}' has a base entity type mapped to a different view. Either map '{otherEntityType}' to a different view or invert the relationship between '{entityType}' and '{otherEntityType}'.
@@ -1038,6 +1038,12 @@ namespace Microsoft.EntityFrameworkCore.Diagnostics
         /// </summary>
         public static string MissingOrderingInSqlExpression
             => GetString("MissingOrderingInSqlExpression");
+
+        /// <summary>
+        ///     Collection subquery that uses 'Distinct' or 'Group By' operations must project key columns of all of it's tables. Missing column: {column}. Either add column(s) to the projection or rewrite query to not use 'GroupBy'/'Distinct' operation.
+        /// </summary>
+        public static string MissingIdentifyingProjectionInDistinctGroupBySubquery([CanBeNull] object column)
+            => string.Format(GetString("MissingIdentifyingProjectionInDistinctGroupBySubquery", nameof(column)), column);
 
         private static string GetString(string name, params string[] formatterNames)
         {

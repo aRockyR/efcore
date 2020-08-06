@@ -700,8 +700,8 @@
   <data name="SequenceContainsNoElements" xml:space="preserve">
     <value>Sequence contains no elements.</value>
   </data>
-  <data name="ProjectingCollectionOnKeylessEntityNotSupported" xml:space="preserve">
-    <value>Projecting collection correlated with keyless entity is not supported.</value>
+  <data name="InsufficientInformationToIdentifyOuterElementOfCollectionJoin" xml:space="preserve">
+    <value>Not enough information to uniquely identify outer element in correlated collection scenario. This can happen when trying to correlate on keyless entity or when using 'Distinct' or 'GroupBy' operations without projecting all of the key columns.</value>
   </data>
   <data name="LogBatchExecutorFailedToRollbackToSavepoint" xml:space="preserve">
     <value>An error occurred while the batch executor was rolling back the transaction to a savepoint, after an exception occured.</value>
@@ -734,5 +734,8 @@
   </data>
   <data name="MissingOrderingInSqlExpression" xml:space="preserve">
     <value>Reverse could not be translated to the server because there is no ordering on the server side.</value>
+  </data>
+  <data name="MissingIdentifyingProjectionInDistinctGroupBySubquery" xml:space="preserve">
+    <value>Collection subquery that uses 'Distinct' or 'Group By' operations must project key columns of all of it's tables. Missing column: {column}. Either add column(s) to the projection or rewrite query to not use 'GroupBy'/'Distinct' operation.</value>
   </data>
 </root>

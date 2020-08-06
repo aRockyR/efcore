@@ -1139,12 +1139,6 @@ ORDER BY c[""CustomerID""]");
             return base.Projecting_multiple_collection_with_same_constant_works(async);
         }
 
-        [ConditionalTheory(Skip = "Issue#17246")]
-        public override Task Projecting_after_navigation_and_distinct_works_correctly(bool async)
-        {
-            return base.Projecting_after_navigation_and_distinct_works_correctly(async);
-        }
-
         public override Task Reverse_without_explicit_ordering_throws(bool async)
         {
             return AssertTranslationFailedWithDetails(
@@ -1155,6 +1149,14 @@ ORDER BY c[""CustomerID""]");
         public override Task Custom_projection_reference_navigation_PK_to_FK_optimization(bool async)
         {
             return base.Custom_projection_reference_navigation_PK_to_FK_optimization(async);
+        }
+
+        [ConditionalTheory(Skip = "issue #17246")]
+        public override async Task Projecting_after_navigation_and_distinct_throws(bool isAsync)
+        {
+            await base.Projecting_after_navigation_and_distinct_throws(isAsync);
+
+            AssertSql(" ");
         }
 
         private void AssertSql(params string[] expected)

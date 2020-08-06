@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.TestModels.GearsOfWarModel;
 using Microsoft.EntityFrameworkCore.TestModels.Northwind;
 using Microsoft.EntityFrameworkCore.TestUtilities;
 using Xunit;
@@ -35,7 +36,23 @@ namespace Microsoft.EntityFrameworkCore.Query
                         OrderDetailIds = ss.Set<Customer>().Where(c => c.City == cq.City).ToList()
                     }).OrderBy(x => x.City).Take(2)))).Message;
 
-            Assert.Equal(RelationalStrings.ProjectingCollectionOnKeylessEntityNotSupported, message);
+            Assert.Equal(RelationalStrings.InsufficientInformationToIdentifyOuterElementOfCollectionJoin, message);
+        }
+
+        [ConditionalTheory]
+        [MemberData(nameof(IsAsyncData))]
+        public virtual async Task Collection_of_entities_projecting_correlated_collection_of_keyless_entities(bool async)
+        {
+            var message = (await Assert.ThrowsAsync<InvalidOperationException>(
+                () => AssertQuery(
+                    async,
+                    ss => ss.Set<Customer>().OrderBy(c => c.CustomerID).Select(c => new
+                    {
+                        c.City,
+                        Collection = ss.Set<CustomerQuery>().Where(cq => cq.City == c.City).ToList(),
+                    })))).Message;
+
+            Assert.Equal(RelationalStrings.InsufficientInformationToIdentifyOuterElementOfCollectionJoin, message);
         }
 
         protected override QueryAsserter CreateQueryAsserter(TFixture fixture)

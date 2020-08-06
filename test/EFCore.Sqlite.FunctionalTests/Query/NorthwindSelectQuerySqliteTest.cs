@@ -186,11 +186,11 @@ FROM ""Orders"" AS ""o""");
                 (await Assert.ThrowsAsync<InvalidOperationException>(
                     () => base.SelectMany_whose_selector_references_outer_source(async))).Message);
 
-        public override async Task Projecting_after_navigation_and_distinct_works_correctly(bool async)
+        public override async Task Projecting_after_navigation_and_distinct_throws(bool async)
             => Assert.Equal(
-                SqliteStrings.ApplyNotSupported,
+                RelationalStrings.InsufficientInformationToIdentifyOuterElementOfCollectionJoin,
                 (await Assert.ThrowsAsync<InvalidOperationException>(
-                    () => base.Projecting_after_navigation_and_distinct_works_correctly(async))).Message);
+                    () => base.Projecting_after_navigation_and_distinct_throws(async))).Message);
 
         [ConditionalTheory(Skip = "Issue#17324")]
         public override Task Project_single_element_from_collection_with_OrderBy_over_navigation_Take_and_FirstOrDefault_2(bool async)

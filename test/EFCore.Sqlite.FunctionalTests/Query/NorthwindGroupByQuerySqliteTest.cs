@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.TestUtilities;
 using Xunit;
 using Xunit.Abstractions;
@@ -18,5 +19,9 @@ namespace Microsoft.EntityFrameworkCore.Query
             Fixture.TestSqlLoggerFactory.Clear();
             //Fixture.TestSqlLoggerFactory.SetTestOutputHelper(testOutputHelper);
         }
+
+        // Sqlite does not support cross/outer apply
+        public override Task Select_uncorrelated_collection_with_groupby_multiple_collections_work(bool async) => null;
+        public override Task Select_uncorrelated_collection_with_groupby_works(bool async) => null;
     }
 }
