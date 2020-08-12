@@ -8375,6 +8375,159 @@ FROM [Entity21807] AS [e]");
 
         #endregion
 
+        #region Issue20711
+
+        [ConditionalFact]
+        public virtual void Simplify_member_access_on_null_conditional_check()
+        {
+            using (CreateDatabase20711())
+            {
+                using var context = new MyContext20711(_options);
+
+                var query = context.Set<SubRegion20711>()
+                    .Select(
+                        s => new SubRegionDto20711
+                        {
+                            Id = s.Id,
+                            Name = s.Name,
+                            Region = (s.Region == null)
+                                ? null
+                                : new OptionDto20711
+                                {
+                                    Id = s.Region.Id,
+                                    Name = s.Region.Name
+                                }
+                        })
+                    .OrderBy(s => s.Region.Name)
+                    .ToList();
+
+                AssertSql(
+                    @"SELECT [s].[Id], [s].[Name], CAST(0 AS bit), [r].[Id], [r].[Name]
+FROM [SubRegion20711] AS [s]
+INNER JOIN [Region20711] AS [r] ON [s].[RegionId] = [r].[Id]
+ORDER BY [r].[Name]");
+            }
+        }
+
+        [ConditionalFact]
+        public virtual void Simplify_member_access_on_null_conditional_check_nested()
+        {
+            using (CreateDatabase20711())
+            {
+                using var context = new MyContext20711(_options);
+
+                var query = context.Set<SubRegion20711>()
+                    .Select(
+                        s => new
+                        {
+                            Id = s.Id,
+                            Name = s.Name,
+                            Region = (s.Region == null)
+                                ? null
+                                : new
+                                {
+                                    Nested = new
+                                    {
+                                        Name = s.Region.Name
+                                    }
+                                }
+                        })
+                    .OrderBy(s => s.Region.Nested.Name)
+                    .ToList();
+
+                AssertSql(
+                    @"SELECT [s].[Id], [s].[Name], CAST(0 AS bit), [r].[Name]
+FROM [SubRegion20711] AS [s]
+INNER JOIN [Region20711] AS [r] ON [s].[RegionId] = [r].[Id]
+ORDER BY [r].[Name]");
+            }
+        }
+
+        [ConditionalFact]
+        public virtual void Simplify_member_access_on_null_conditional_check_nested_in_where()
+        {
+            using (CreateDatabase20711())
+            {
+                using var context = new MyContext20711(_options);
+
+                var query = context.Set<SubRegion20711>()
+                    .Select(
+                        s => new
+                        {
+                            Id = s.Id,
+                            Name = s.Name,
+                            Region = (s.Region == null)
+                                ? null
+                                : new
+                                {
+                                    Nested = new
+                                    {
+                                        Name = s.Region.Name
+                                    }
+                                }
+                        })
+                    .Where(s => s.Region.Nested.Name == "A")
+                    .ToList();
+
+                AssertSql(
+                    @"SELECT [s].[Id], [s].[Name], CAST(0 AS bit), [r].[Name]
+FROM [SubRegion20711] AS [s]
+INNER JOIN [Region20711] AS [r] ON [s].[RegionId] = [r].[Id]
+WHERE [r].[Name] = N'A'");
+            }
+        }
+
+        private class Region20711
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public ICollection<SubRegion20711> SubRegion { get; set; }
+        }
+
+        private class SubRegion20711
+        {
+            public int Id { get; set; }
+            public int RegionId { get; set; }
+            public string Name { get; set; }
+            public Region20711 Region { get; set; }
+        }
+
+        private class SubRegionDto20711
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public OptionDto20711 Region { get; set; }
+        }
+
+        private class OptionDto20711
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+        }
+
+        private class MyContext20711 : DbContext
+        {
+            public MyContext20711(DbContextOptions options)
+                : base(options)
+            {
+            }
+
+            protected override void OnModelCreating(ModelBuilder modelBuilder)
+            {
+                modelBuilder.Entity<Region20711>();
+            }
+        }
+
+        private SqlServerTestStore CreateDatabase20711()
+            => CreateTestStore(
+                () => new MyContext20711(_options),
+                context =>
+                {
+                    ClearLog();
+                });
+
+        #endregion
+
         private DbContextOptions _options;
 
         private SqlServerTestStore CreateTestStore<TContext>(
